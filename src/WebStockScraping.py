@@ -2,7 +2,7 @@
 
 import utils
 import whois
-
+import re
 
 class WebStockScraping:
 
@@ -26,3 +26,10 @@ class WebStockScraping:
 
     def show_html(self):
         print(self.soup.prettify())
+
+    def show_tickers(self):
+        """ Print Ticker and href for Ibex 35 Companies"""
+
+        l_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:0px")})
+        for span in l_span:
+            print(span.a.text, span.a['href'])

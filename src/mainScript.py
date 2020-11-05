@@ -12,6 +12,7 @@ sys.path.append(' M2.851 - Tipología y ciclo de vida de los datos  ')
 webStockScraping = WebStockScraping(robots=False, delay=False)
 
 
-webStockScraping.show_html()
+webStockScraping.show_tickers()
+#webStockScraping.show_html()
 
 print("--- FIN ---")
