@@ -20,6 +20,8 @@ class WebStockScraping:
         self.currentDir = os.path.dirname(__file__)
         self.filename = "bolsa_ibex_35.csv"
         self.filePath = os.path.join(self.currentDir, self.filename)
+        self.ticker = []
+        self.nombre = []
 
         """ Previous phase to evaluate the following aspects:"""
 
@@ -41,8 +43,11 @@ class WebStockScraping:
         """ Print Ticker and href for Ibex 35 Companies"""
 
         l_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:0px")})
-        for span in l_span:
-            print(span.a.text, span.a['href'])
+        s_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:90px")})
+        for span, span_aux in zip(l_span, s_span):
+            print(span.a.text, span.a['href'], span_aux.a.text)
+            self.ticker.append(span.a.text)
+            self.nombre.append(span_aux.a.text)
             self.get_span_values(span.a['href'])
             #self.links.append(span.a['href'])
             #print(self.links)
@@ -70,8 +75,8 @@ class WebStockScraping:
             
     def write_csv(self):
         with open(self.filePath, 'w', newline='') as csvFile:
-            writer = csv.DictWriter(csvFile, fieldnames=["Última transaccion", "Volumen", "Máximo diario", "Mínimo diario"])
+            writer = csv.DictWriter(csvFile, fieldnames=["Ticker", "Nombre", "Última transaccion", "Volumen", "Máximo diario", "Mínimo diario"])
             writer.writeheader()
             writer = csv.writer(csvFile)
             for i in range(len(self.ultima_transaccion)):
-                writer.writerow([self.ultima_transaccion[i], self.volumen[i], self.max_diario[i], self.min_diario[i]])
+                writer.writerow([self.ticker[i], self.nombre[i], self.ultima_transaccion[i], self.volumen[i], self.max_diario[i], self.min_diario[i]])
