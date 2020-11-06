@@ -6,9 +6,10 @@ import re
 import csv
 import os
 
+
 class WebStockScraping:
 
-    def __init__(self, robots=False, delay=False):
+    def __init__(self, robots=True, delay=True):
         self.url_page = "http://www.bolsa.es/"
         self.robots = robots
         self.delay = delay
@@ -29,11 +30,11 @@ class WebStockScraping:
         # 2) sitemap,
         # 3) size,
         # 4) technology used
+        #print("\n Technology Used: ", builtwith.builtwith(self.url_page), "\n")
+
         # 5) owner
         print(whois.whois(self.url_page))
 
-        self.headers = {"User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"}
-        # We will need robots and delay later
         self.soup = utils.parse_html_soup(self.url_page, self.robots, self.delay)
 
     def show_html(self):
@@ -45,7 +46,7 @@ class WebStockScraping:
         l_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:0px")})
         s_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:90px")})
         for span, span_aux in zip(l_span, s_span):
-            print(span.a.text, span.a['href'], span_aux.a.text)
+            #print(span.a.text, span.a['href'], span_aux.a.text)
             self.ticker.append(span.a.text)
             self.nombre.append(span_aux.a.text)
             self.get_span_values(span.a['href'])
@@ -56,10 +57,9 @@ class WebStockScraping:
         print(self.volumen)
         print(self.max_diario)
         print(self.min_diario)"""
-        
-            
+
     def get_span_values(self, url):
-        soup_links = utils.parse_html_soup(self.url_page+url, self.robots, self.delay)
+        soup_links = utils.parse_html_soup(self.url_page+url, False, self.delay)
         l_span = soup_links.find_all('span', {'style': re.compile(r"position:absolute;left:23px")})
         for span in l_span:
             if "Última transacción" in span.text:
