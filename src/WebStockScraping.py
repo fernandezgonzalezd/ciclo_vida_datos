@@ -127,3 +127,5 @@ class WebStockScraping:
         img_capture = driver.find_element_by_id('IdObjetoGrafica').get_attribute("src")
         urllib.request.urlretrieve(img_capture, self.nombre[self.img_count]+".png")
         self.img_count = self.img_count + 1;
+        
+        driver.close()
