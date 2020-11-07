@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+import urllib
 import utils
 import whois
 import re
 import csv
 import os
-
+import builtwith
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
 
 class WebStockScraping:
 
@@ -23,6 +26,7 @@ class WebStockScraping:
         self.filePath = os.path.join(self.currentDir, self.filename)
         self.ticker = []
         self.nombre = []
+        self.img_count = 0
 
         """ Previous phase to evaluate the following aspects:"""
 
@@ -30,7 +34,8 @@ class WebStockScraping:
         # 2) sitemap,
         # 3) size,
         # 4) technology used
-        #print("\n Technology Used: ", builtwith.builtwith(self.url_page), "\n")
+        
+        #print("\n Technology Used: ", builtwith.parse('http://www.bolsa.es/'), "\n")
 
         # 5) owner
         print(whois.whois(self.url_page))
@@ -50,9 +55,11 @@ class WebStockScraping:
             self.ticker.append(span.a.text)
             self.nombre.append(span_aux.a.text)
             self.get_span_values(span.a['href'])
+            self.generate_historical_histogram(span.a['href'])
             #self.links.append(span.a['href'])
             #print(self.links)
         self.write_csv()
+        self.generate_histogram()
         """print(self.ultima_transaccion)
         print(self.volumen)
         print(self.max_diario)
@@ -80,3 +87,43 @@ class WebStockScraping:
             writer = csv.writer(csvFile)
             for i in range(len(self.ultima_transaccion)):
                 writer.writerow([self.ticker[i], self.nombre[i], self.ultima_transaccion[i], self.volumen[i], self.max_diario[i], self.min_diario[i]])
+    
+    def write_csv_hist(self, filePath, dia, cierre, cambio, cambio_porc, maximo, minimo, volumen):
+        with open(filePath, 'w', newline='') as csvFile:
+            writer = csv.DictWriter(csvFile, fieldnames=["DÍA", "CIERRE", "CAMBIO", "CAMBIO%", "MÁXIMO", "MÍNIMO", "VOLUMEN"])
+            writer.writeheader()
+            writer = csv.writer(csvFile)
+            for col1, col2, col3, col4, col5, col6, col7 in zip(dia, cierre, cambio, cambio_porc, maximo, minimo, volumen) :
+                writer.writerow([col1.text, col2.text, col3.text, col4.text, col5.text, col6.text, col7.text])
+                #print(col1.text)
+            #for i in range(len(self.ultima_transaccion)):
+                #writer.writerow([self.ticker[i], self.nombre[i], self.ultima_transaccion[i], self.volumen[i], self.max_diario[i], self.min_diario[i]])
+
+
+    def generate_historical_histogram(self, url):
+        driver = webdriver.Chrome(executable_path="C:\Drivers\chromedriver_win32\chromedriver.exe")
+        driver.get(self.url_page+url)
+        select = Select(driver.find_element_by_id('IdMesI'))
+        #select by visible text
+        #select.select_by_visible_text('ENE')
+        #select by value 
+        select.select_by_value('1')
+        #select = Select(driver.find_element_by_id('IdMesF'))
+        #select.select_by_value('1')
+        drp = driver.find_element_by_id('Enviar')
+        drp.click();
+        
+        dia = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:2px')]")
+        cierre = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:110px')]")
+        cambio = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:210px')]")
+        cambio_porc = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:310px')]")
+        maximo = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:410px')]")
+        minimo = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:510px')]")
+        volumen = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:610px')]")
+        
+        filePath = os.path.join(self.currentDir, self.nombre[self.img_count]+".csv")
+        self.write_csv_hist(filePath, dia, cierre, cambio, cambio_porc, maximo, minimo, volumen)
+           
+        img_capture = driver.find_element_by_id('IdObjetoGrafica').get_attribute("src")
+        urllib.request.urlretrieve(img_capture, self.nombre[self.img_count]+".png")
+        self.img_count = self.img_count + 1;

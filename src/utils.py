@@ -46,7 +46,7 @@ def parse_html_soup(url, robots=True, delay=True):
     return soup
 
 
-def hlcheck_robots_txt(url, delay=True):
+def check_robots_txt(url, delay=True):
     if delay:
         delay_random(url=url)
     rp = robot_parser.RobotFileParser()
