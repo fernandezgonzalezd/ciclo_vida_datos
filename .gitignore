@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+Bolsa_ibex_35.csv
 src/images/**
 src/output/**
 *.iml
