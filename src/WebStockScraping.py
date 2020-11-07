@@ -56,7 +56,7 @@ class WebStockScraping:
             self.ticker.append(span.a.text)
             self.nombre.append(span_aux.a.text)
             self.get_span_values(span.a['href'])
-           # self.generate_historical_histogram(span.a['href'])
+            self.generate_historical_histogram(span.a['href'])
             # self.links.append(span.a['href'])
             # print(self.links)
         self.write_csv()
