@@ -10,6 +10,7 @@ import builtwith
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import shutil
+from selenium.common.exceptions import NoSuchElementException
 
 
 class WebStockScraping:
@@ -133,14 +134,16 @@ class WebStockScraping:
         file_path = os.path.join(self.currentDir, "output/", self.nombre[self.imgCount] + ".csv")
         self.write_csv_hist(file_path, dia, cierre, cambio, cambio_porc, maximo, minimo, volumen)
 
-        img_capture = driver.find_element_by_id('IdObjetoGrafica').get_attribute("src")
-        file_name = os.path.join(self.currentDir, "images/", self.nombre[self.imgCount] + ".png")
+        try:
+            img_capture = driver.find_element_by_id('IdObjetoGrafica').get_attribute("src")
+            file_name = os.path.join(self.currentDir, "images/", self.nombre[self.imgCount] + ".png")
+            # Legacy
+            # urllib.request.urlretrieve(img_capture, file_image)
+            with urllib.request.urlopen(img_capture) as response, open(file_name, 'wb') as out_file:
+                shutil.copyfileobj(response, out_file)
 
-        # Legacy
-        # urllib.request.urlretrieve(img_capture, file_image)
-
-        with urllib.request.urlopen(img_capture) as response, open(file_name, 'wb') as out_file:
-            shutil.copyfileobj(response, out_file)
+        except NoSuchElementException:
+            print("error downloading image for " + self.nombre[self.imgCount])
 
         self.imgCount = self.imgCount + 1
 

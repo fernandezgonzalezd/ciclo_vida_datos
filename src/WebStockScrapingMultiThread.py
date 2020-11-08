@@ -14,9 +14,10 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import shutil
 import threading
+import collections
+import multiprocessing
 
-
-class WebStockScraping:
+class WebStockScrapingMultiThread:
 
     def __init__(self, robots=True, delay=True):
         self.urlPage = "http://www.bolsa.es/"
@@ -57,27 +58,22 @@ class WebStockScraping:
         l_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:0px")})
         s_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:90px")})
         threads = []
+        pool = multiprocessing.Pool()
 
         for span, span_aux in zip(l_span, s_span):
             self.ticker.append(span.a.text)
             self.nombre.append(span_aux.a.text)
             self.get_span_values(span.a['href'])
+
             t = threading.Thread(target=self.generate_historical_histogram, args=(span.a['href'],))
             threads.append(t)
 
             t.start()
 
-            # self.generate_historical_histogram(span.a['href'])
-            # self.links.append(span.a['href'])
-            # print(self.links)
         for x in threads:
             x.join()
+
         self.write_csv()
-        # self.generate_histogram()
-        """print(self.ultima_transaccion)
-        print(self.volumen)
-        print(self.max_diario)
-        print(self.min_diario)"""
 
     def get_span_values(self, url):
         soup_links = utils.parse_html_soup(self.urlPage + url, False, self.delay)
@@ -114,13 +110,10 @@ class WebStockScraping:
                                     fieldnames=["DÍA", "CIERRE", "CAMBIO", "CAMBIO%", "MÁXIMO", "MÍNIMO", "VOLUMEN"])
             writer.writeheader()
             writer = csv.writer(csvFile)
-            print("Saving csv " + file_path)
+            print("write_csv_hist csv " + file_path)
             for col1, col2, col3, col4, col5, col6, col7 in zip(dia, cierre, cambio, cambio_porc, maximo, minimo,
                                                                 volumen):
                 writer.writerow([col1.text, col2.text, col3.text, col4.text, col5.text, col6.text, col7.text])
-                # print(col1.text)
-            # for i in range(len(self.ultima_transaccion)):
-            # writer.writerow([self.ticker[i], self.nombre[i], self.ultima_transaccion[i], self.volumen[i], self.max_diario[i], self.min_diario[i]])
 
     def generate_historical_histogram(self, url):
         # Windows
@@ -129,12 +122,7 @@ class WebStockScraping:
         driver = webdriver.Chrome(executable_path="/home/david/Software/chromedriver_linux64/chromedriver")
         driver.get(self.urlPage + url)
         select = Select(driver.find_element_by_id('IdMesI'))
-        # select by visible text
-        # select.select_by_visible_text('ENE')
-        # select by value
         select.select_by_value('1')
-        # select = Select(driver.find_element_by_id('IdMesF'))
-        # select.select_by_value('1')
         drp = driver.find_element_by_id('Enviar')
         drp.click()
 
@@ -160,11 +148,6 @@ class WebStockScraping:
 
         except NoSuchElementException:
             print("error downloading image for " + self.nombre[self.imgCount])
-
-        # Legacy
-        # urllib.request.urlretrieve(img_capture, file_image)
-
-
 
         self.imgCount = self.imgCount + 1
 
