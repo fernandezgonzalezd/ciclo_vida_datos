@@ -1,5 +1,39 @@
 # Práctica Tipología y Ciclo de vida de datos 1
 
+# WebStockScrapingMultiThread
+
+Práctica 1: Práctica Tipología y Ciclo de vida de datos 1
+Práctica de generación de dataset mediante web scraping
+
+El DOI de publicación en Zenodo es:
+
+# Alumnos
+
+* Waziri Ajibola Lawal
+* David Fernández González
+
+## Ejecución
+Para ejecutar mainSCript.py hay que tener instalados los siguientes componentes:
+- **BeautifulSoup**             
+- **threading**           
+- **selenium**      
+
+El webdriver usado para selenium es **chromedriver**. Es necesario cambiar el *executable_path* en el archivo 
+WebStockScrapingMultiThread.py, línea 115
+
+En el proceso de llamadas se usa:   
+
+- Check Robots.txt file
+- Random User Agents
+- Delay Random entre llamadas
+- Threads: para hacer más rápdia la ejecución recoger la información con selenium
+## Ficheros del código fuente
+
+   * **src/utils.py**: funciones para comprobar el robots.txt, parsear la página web, random delays, etc
+   * **src/WebStockScrapingMultiThread.py**: contiene la clase que  recoge la información de bolsa.es, y de cada compañía
+   * **src/WebStockScraping.py** mismo código que WebStockScrapingMultiThread, pero sin ejecución en paralelo, más lento 
+
+
 ## Objetivos
 
   Los objetivos concretos de esta práctica son:
