@@ -5,7 +5,7 @@
 Práctica 1: Práctica Tipología y Ciclo de vida de datos 1
 Práctica de generación de dataset mediante web scraping
 
-El DOI de publicación en Zenodo es:
+El DOI de publicación en Zenodo es: 10.5281/zenodo.4262200
 
 # Alumnos
 
