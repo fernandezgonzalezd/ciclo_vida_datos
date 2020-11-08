@@ -9,13 +9,11 @@ import whois
 import re
 import csv
 import os
-import builtwith
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import shutil
 import threading
-import collections
-import multiprocessing
+
 
 class WebStockScrapingMultiThread:
 
@@ -33,7 +31,6 @@ class WebStockScrapingMultiThread:
         self.filePath = os.path.join(self.currentDir, self.fileName)
         self.ticker = []
         self.nombre = []
-        self.imgCount = 0
 
         """ Previous phase to evaluate the following aspects:"""
 
@@ -57,20 +54,17 @@ class WebStockScrapingMultiThread:
 
         l_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:0px")})
         s_span = self.soup.find_all('span', {'style': re.compile(r"position:absolute;left:90px")})
-        threads = []
-        pool = multiprocessing.Pool()
+        my_threads = []
 
         for span, span_aux in zip(l_span, s_span):
             self.ticker.append(span.a.text)
             self.nombre.append(span_aux.a.text)
             self.get_span_values(span.a['href'])
-
-            t = threading.Thread(target=self.generate_historical_histogram, args=(span.a['href'],))
-            threads.append(t)
-
+            t = threading.Thread(target=self.generate_historical_histogram, args=(span.a['href'], span_aux.a.text, ))
             t.start()
+            my_threads.append(t)
 
-        for x in threads:
+        for x in my_threads:
             x.join()
 
         self.write_csv()
@@ -115,10 +109,9 @@ class WebStockScrapingMultiThread:
                                                                 volumen):
                 writer.writerow([col1.text, col2.text, col3.text, col4.text, col5.text, col6.text, col7.text])
 
-    def generate_historical_histogram(self, url):
+    def generate_historical_histogram(self, url, name):
         # Windows
         # driver = webdriver.Chrome(executable_path="C:\Drivers\chromedriver_win32\chromedriver.exe")
-        # Linux
         driver = webdriver.Chrome(executable_path="/home/david/Software/chromedriver_linux64/chromedriver")
         driver.get(self.urlPage + url)
         select = Select(driver.find_element_by_id('IdMesI'))
@@ -134,21 +127,17 @@ class WebStockScrapingMultiThread:
         minimo = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:510px')]")
         volumen = driver.find_elements_by_xpath("//span[contains(@style, 'position:absolute;left:610px')]")
 
-        #file_path = os.path.join(self.currentDir, "output/", self.nombre[self.imgCount] + ".csv")
-        print("self.nombre[self.imgCount] " + self.nombre.__str__())
-        self.write_csv_hist(self.nombre[self.imgCount], dia, cierre, cambio, cambio_porc, maximo, minimo, volumen)
+        self.write_csv_hist(name, dia, cierre, cambio, cambio_porc, maximo, minimo, volumen)
 
         try:
             img_capture = driver.find_element_by_id('IdObjetoGrafica').get_attribute("src")
-            file_name = os.path.join(self.currentDir, "images/", self.nombre[self.imgCount] + ".png")
+            file_name = os.path.join(self.currentDir, "images/", name + ".png")
             with urllib.request.urlopen(img_capture) as response, open(file_name, 'wb') as out_file:
                 shutil.copyfileobj(response, out_file)
 
             print("Saving image " + file_name)
 
         except NoSuchElementException:
-            print("error downloading image for " + self.nombre[self.imgCount])
-
-        self.imgCount = self.imgCount + 1
+            print("error downloading image for " + name)
 
         driver.close()

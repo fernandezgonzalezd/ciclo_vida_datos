@@ -14,8 +14,8 @@ sys.path.append(' M2.851 - Tipología y ciclo de vida de los datos  ')
 # store starting time
 begin = time.time()
 
-webStockScraping = WebStockScraping(robots=True, delay=True)
-#webStockScraping = WebStockScrapingMultiThread(robots=True, delay=True)
+# webStockScraping = WebStockScraping(robots=True, delay=True)
+webStockScraping = WebStockScrapingMultiThread(robots=True, delay=True)
 
 
 webStockScraping.show_tickers()
