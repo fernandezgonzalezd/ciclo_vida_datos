@@ -1,0 +1,70 @@
+---
+title: 'Práctica 2: Limpieza y validación de los datos'
+author: "Waziri Ajibola Lawal, David Fernández González"
+date: "1/3/2021"
+output:
+  html_document
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+******
+# Realización de la práctica
+******
+
+## Procesos de limpieza del conjunto de datos
+
+Primer contacto con el conjunto de datos, visualizamos su estructura.  
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Cargamos los paquetes R que vamos a usar
+library(ggplot2)
+library(dplyr)
+
+# Cargamos el fichero de datos
+redWineData <- read.csv('winequality-red.csv',stringsAsFactors = FALSE, header = TRUE)
+#filas=dim(redWineData)[1]
+
+# Verificamos la dimension del conjunto de datos
+dim(redWineData)
+
+# Verificamos la estructura del conjunto de datos
+sapply(redWineData, class)
+
+# Verificamos la estructura del conjunto de datos
+str(redWineData)
+
+# Verificamos la distribución de los datos  
+head(redWineData)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Estadísticas básicas
+summary(redWineData)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+# Verificamos si existen valores vacios en el conjunto de datos
+colSums(is.na(redWineData))
+```
+
+El conjunto de datos de vino tinto contiene 1599 observaciones, 11 predictores y 1 valor categórico que indica la calidad del vino. Todos los predictores son valores numéricos, los resultados son enteros. Como podemos observar, no existen valores vacios en el conjunto de datos.
+
+
+Las estadísticas resumidas muestran que la mayoría de las variables tienen un rango amplio en comparación con el IQR, lo que puede indicar una dispersión en los datos y la presencia de valores atípicos. Investigamos más a fondo produciendo diagramas de caja para cada una de las variables:
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+oldpar = par(mfrow = c(2,6))
+for ( i in 1:11 ) {
+  boxplot(redWineData[[i]])
+  mtext(names(redWineData)[i], cex = 0.8, side = 1, line = 2)
+}
+par(oldpar)
+```
+
+Podemos ver que todas las variables contienen valores atípicos.
